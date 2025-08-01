@@ -1,11 +1,11 @@
 import pymysql
 import enc_dec_func as edfunc
 
-host = 'ASONIT.mysql.pythonanywhere-services.com'
-user = 'ASONIT'
+host = 'database host address'
+user = 'username'
 target_string = '78+31j,18+25j,92+46j,48+44j,87+50j,76+9j,51+42j,36+9j,11+42j' # encoded_string
 password = edfunc.Decoding(1234, target_string, "your password") # arguments: seed, encoded_string, your password
-db = 'ASONIT$cleaning_order_info'
+db = 'database name'
 
 
 # ==================================== read =====================================
