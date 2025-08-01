@@ -1,0 +1,66 @@
+body{
+    background-color: aliceblue;
+}
+
+/* 화면설정 */
+.wrapper{
+    display: flex;        
+    flex-direction: column;
+    align-items: center;
+}
+
+.tab{
+    cursor: pointer;
+    padding: 10px 20px;
+    margin: 0px 2px;
+    background-color: #39c5bb;
+    color: white;
+    display: inline-block;
+    border-radius: 3px 3px 0px 0px;
+}
+
+.panels{
+    background-color: white;
+    min-height: 200px;
+    width: 286px;
+    max-width: 500px;
+    border-radius: 3px;
+    overflow: hidden;
+    text-align: center;
+}
+
+.panel{
+    display: none;
+}
+
+.panel-title{
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+
+p{
+    font-size: 0.8em;
+    color: black;
+    text-align: left;
+}
+
+.radio{
+     display: none;  /*체크박스 숨기기 */
+}
+
+/* display: none인 설명창을 각 조건에 따라 block해주기 */
+#one:checked ~ .panels #one-panel,
+#two:checked ~ .panels #two-panel,
+#three:checked ~ .panels #three-panel{
+    display: block;
+}
+
+/* 탭 위쪽 디자인(없어도 상관x) */
+#one:checked ~ .tabs #one-tab,
+#two:checked ~ .tabs #two-tab,
+#three:checked ~ .tabs #three-tab{
+    background-color: #fff;
+    color: #39c5bb;
+    border-top: 3px solid #39c5bb;
+}

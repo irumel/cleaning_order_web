@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>우선순위 선택기</title>
+    <style>
+        .priority-btn {
+            display: block;
+            margin: 5px 0;
+            padding: 10px;
+            width: 200px;
+        }
+        .toggled {
+            background-color: lightgreen;
+        }
+    </style>
+</head>
+<body>
+    <h2>날짜 선택:</h2>
+    <input type="date" id="datePicker" value="{{ today }}">
+
+    <h2>우선순위 출력</h2>
+    <button onclick="showPriorities()">우선순위 출력</button>
+
+    <div id="priorityContainer"></div>
+
+    <br>
+    <button onclick="saveSelection()">입력</button>
+
+    <script>
+        let toggledButtons = new Set();
+
+        function showPriorities() {
+            fetch('/get_priorities')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('priorityContainer');
+                    container.innerHTML = '';  // 초기화
+
+                    data.forEach((item, index) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'priority-btn';
+                        btn.textContent = `${index + 1}. ${item}`;
+                        btn.dataset.value = item;
+                        btn.onclick = () => {
+                            btn.classList.toggle('toggled');
+                            if (toggledButtons.has(item)) {
+                                toggledButtons.delete(item);
+                            } else {
+                                toggledButtons.add(item);
+                            }
+                        };
+                        container.appendChild(btn);
+                    });
+                });
+        }
+
+        function saveSelection() {
+            const selected = Array.from(toggledButtons);
+            const date = document.getElementById('datePicker').value;
+            const now = new Date();
+            const time = now.toTimeString().split(' ')[0];  // HH:MM:SS 형식
+
+            const selectedDate = new Date(date);
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const weekday = weekdays[selectedDate.getDay()];  // getDay() → 0~6
+            
+            if (selected.length === 0) {
+                alert('선택한 버튼이 없습니다');
+                return;  // 서버로 요청하지 않음
+            }
+
+            fetch('/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ selected, date, weekday, time })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('저장되었습니다.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

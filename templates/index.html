@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <link rel="stylesheet" href="static/css/style.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabs</title>
+</head>
+<body>
+    <div class="wrapper">
+        <input class ="radio" type="radio" name="group" id="one" checked>
+        <input class ="radio" type="radio" name="group" id="two">
+        <input class ="radio" type="radio" name="group" id="three" onchange="handleRadioChange(this)">
+
+        <div class="tabs">
+            <label class = "tab" id= "one-tab" for="one">우선순위 선택</label>
+            <label class = "tab" id= "two-tab" for="two">관리</label>
+            <label class = "tab" id= "three-tab" for="three">기록</label>
+        </div>
+
+        <div class="panels">
+            <div class="panel" id = "one-panel">
+                <div class="panel-title">우선순위 선택</div>
+                    <div>
+                        <meta charset="UTF-8">
+                        <style>
+                            .priority-btn {
+                            margin-left: 5px;
+                            margin-top: 5px;
+                            background-color: #ffffff;
+                            padding:10px 30px;
+                            height: auto;
+                            min-width: 130px;
+                            box-sizing: border-box;
+                            border-radius: 5px;
+                            font-size: 15px;
+                            color:rgb(42, 42, 42);
+                            font-weight: 700;
+                            border: 1px solid #dcdcdc;
+                        }
+
+                        .toggled {
+                            background-color: #39c5bb;
+                        }
+                        </style>
+                    </div>
+                    <div>
+                        <h2>날짜 선택:</h2>
+                        <input type="date" id="datePicker" value="{{ today }}">
+
+                        <h2>우선순위 출력</h2>
+                        <button onclick="showPriorities()">우선순위 출력</button>
+
+                        <div id="priorityContainer"></div>
+
+                        <br>
+                        <button onclick="saveSelection()">입력</button>
+                    </div>
+                </div>
+            
+
+                <div class="panel" id = "two-panel">
+                    <div class="panel-title">관리</div>
+                        <div>
+                            <meta charset="UTF-8">
+                            <style>
+                                .activation-btn {
+                                    margin-left: 5px;
+                                    margin-top: 5px;
+                                    background-color: #ffffff;
+                                    padding:10px 30px;
+                                    height: auto;
+                                    min-width: 130px;
+                                    box-sizing: border-box;
+                                    border-radius: 5px;
+                                    font-size: 15px;
+                                    color:rgb(42, 42, 42);
+                                    font-weight: 700;
+                                    border: 1px solid #dcdcdc;
+                                }
+
+                                .toggled {
+                                    background-color: lightgreen;
+                                }
+                            </style>
+                        </div>
+                        <button onclick="showActivations()">활성화 상태 출력</button>
+                        <div id="activationContainer"></div>
+                        <br>
+                        <button onclick="saveActivation()">입력</button>
+                </div>
+
+            <div class="panel" id = "three-panel">
+                <div class="panel-title">기록</div>
+                <div id="historyContainer"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let toggledButtons = new Set();
+
+        function showPriorities() {
+            fetch('/get_priorities')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('priorityContainer');
+                    container.innerHTML = '';  // 초기화
+
+                    data.forEach((item, index) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'priority-btn';
+                        btn.textContent = `${index + 1}. ${item}`;
+                        btn.dataset.value = item;
+                        btn.onclick = () => {
+                            btn.classList.toggle('toggled');
+                            if (toggledButtons.has(item)) {
+                                toggledButtons.delete(item);
+                            } else {
+                                toggledButtons.add(item);
+                            }
+                        };
+                        container.appendChild(btn);
+                    });
+                });
+        }
+
+        function saveSelection() {
+            const selected = Array.from(toggledButtons);
+            const date = document.getElementById('datePicker').value;
+            const now = new Date();
+            const time = now.toTimeString().split(' ')[0];  // HH:MM:SS 형식
+
+            const selectedDate = new Date(date);
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const weekday = weekdays[selectedDate.getDay()];  // getDay() → 0~6
+            
+            if (selected.length === 0) {
+                alert('선택한 버튼이 없습니다');
+                return;  // 서버로 요청하지 않음
+            }
+
+            fetch('/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ selected, date, weekday, time })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('저장되었습니다.');
+                }
+            });
+        }
+
+        let ActivataionButtons = new Set();
+
+        function showActivations() {
+            fetch('/get_activations')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('activationContainer');
+                    container.innerHTML = '';  // 초기화
+
+                    data.forEach((item, index) => {
+                    const label = item[0];  // 버튼 텍스트
+                    const state = item[1];  // 초기 토글 상태 (0 or 1)
+
+                    const btn = document.createElement('button');
+                    btn.className = 'activation-btn';
+                    btn.textContent = label;
+                    btn.dataset.value = label;
+
+                    // 초기 토글 상태가 1이면 토글 클래스 추가 및 Set에 등록
+                    if (state === 1) {
+                        btn.classList.add('toggled');
+                        ActivataionButtons.add(label);
+                    }
+
+                    btn.onclick = () => {
+                        btn.classList.toggle('toggled');
+                        if (ActivataionButtons.has(label)) {
+                            ActivataionButtons.delete(label);
+                        } else {
+                            ActivataionButtons.add(label);
+                        }
+                    };
+
+                    container.appendChild(btn);
+                });
+
+                });
+        }
+
+        function saveActivation() {
+            const selected = Array.from(ActivataionButtons);
+            
+            if (selected.length === 0) {
+                alert('활성화된 인원이 없습니다');
+                return;  // 서버로 요청하지 않음
+            }
+
+            fetch('/save_activations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ selected })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('저장되었습니다.');
+                }
+            });
+        }
+
+        function handleRadioChange(radio) {
+            fetch('/get_history')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('historyContainer');
+                    container.innerHTML = '';  // 초기화
+
+                    if (Array.isArray(data)) {
+                        // 받아온 데이터가 문자열 리스트일 경우
+                        data.forEach((item, index) => {
+                            const p = document.createElement('p');
+                            p.textContent = item;
+                            container.appendChild(p);
+                        });
+                    } else if (typeof data === 'string') {
+                        // 받아온 데이터가 단일 문자열일 경우
+                        const p = document.createElement('p');
+                        p.textContent = data;
+                        container.appendChild(p);
+                    }
+                });
+            
+        }
+    </script>
+</body>
+</html>
