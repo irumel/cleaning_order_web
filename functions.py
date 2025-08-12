@@ -12,11 +12,15 @@ db = 'database name'
 
 # info 파일을 읽고 info 리스트로 반환합니다
 # 입력: 없음
-# 출력: info (2차원 리스트 [[str, int, int, int, int]])
-# info: [[이름, 구역, 값, 누적 횟수, 활성화 여부]]
+# 출력: info (2차원 리스트 [[str, int, int, int, int, int]])
+# info: [[이름, 구역, 값, 누적 횟수, 활성화 여부, 정렬 기준 숫자]]
 def read_infofile():
   conn = pymysql.connect(host = host, user = user, password = password, db = db, charset = 'utf8')
   cur = conn.cursor()
+  cur.execute("SELECT * FROM ideal")
+  row = cur.fetchone()
+  ideal_implementer = row[0]
+
   cur.execute("SELECT * FROM info")
 
   info = []
@@ -26,6 +30,13 @@ def read_infofile():
     person_info = list(row)
     info.append(person_info)
   conn.close()
+
+  for index, person_info in enumerate(info):
+    if person_info[0] == ideal_implementer:
+      start_index = index
+  
+  for i in range(len(info)):
+    info[(i+start_index)%len(info)].append(i)
 
   return info
 
@@ -58,7 +69,7 @@ def write_historyfile(implementer, date, weekday, time):
 # 출력: lst (1차원 리스트 [str, str, str])
 def get_priority_list():
   info = read_infofile()
-  sorted_info = sorted(info, key=lambda x: (-x[4], x[2], x[1]))
+  sorted_info = sorted(info, key=lambda x: (-x[4], x[2], x[5], x[1]))
 
   lst = []
   for data in sorted_info:
@@ -187,7 +198,7 @@ def save_activation(activaion_list):
 
 # ==================================== save =====================================
 
-
+# 사용되지 않는 함수
 def add_person():
   info = read_infofile()
 
