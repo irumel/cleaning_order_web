@@ -150,6 +150,9 @@
                 if (data.status === 'success') {
                     alert('저장되었습니다.');
                 }
+                if (data.status === 'too_much') {
+                    alert('입력된 인원이 2명을 초과합니다. 입력을 취소합니다.')
+                }
             });
         }
 
