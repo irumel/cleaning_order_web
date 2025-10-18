@@ -50,7 +50,7 @@ def save():
     weekday = data.get('weekday')
 
     if len(selected_buttons) > 2:
-        return jsonify({'status: too_much'})
+        return jsonify({'status': 'too_much'})
 
     # 저장
     functions.save_implementer(selected_buttons)
