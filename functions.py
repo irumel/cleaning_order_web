@@ -69,7 +69,7 @@ def write_historyfile(implementer, date, weekday, time):
 # 출력: lst (1차원 리스트 [str, str, str])
 def get_priority_list():
   info = read_infofile()
-  sorted_info = sorted(info, key=lambda x: (-x[4], x[2], x[5], x[1]))
+  sorted_info = sorted(info, key=lambda x: (-x[4], x[2], x[1], x[5]))
 
   lst = []
   for data in sorted_info:
