@@ -105,6 +105,7 @@ def get_history():
     history_list.append(f'{row[0]} {row[1]}\t{row[2]}\n')
     history_list.append('\n')
 
+  history_list.reverse()
   conn.close()
   return history_list
 # ======================================= get ===================================
@@ -202,8 +203,8 @@ def refresh(date, weekday, time):
   conn = pymysql.connect(host = host, user = user, password = password, db = db, charset = 'utf8')
   cur = conn.cursor()
 
-  formatted_date = f'{date} ({weekday})'
-  cur.execute("INSERT into history values (%s, %s)", (formatted_date, time))
+  formatted_date = f'{date} ({weekday}) {time}'
+  cur.execute("UPDATE refresh_date SET date = %s", formatted_date)
 
   conn.commit()
   conn.close()
