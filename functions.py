@@ -198,6 +198,16 @@ def save_activation(activaion_list):
 
 # ==================================== save =====================================
 
+def refresh(date, weekday, time):
+  conn = pymysql.connect(host = host, user = user, password = password, db = db, charset = 'utf8')
+  cur = conn.cursor()
+
+  formatted_date = f'{date} ({weekday})'
+  cur.execute("INSERT into history values (%s, %s)", (formatted_date, time))
+
+  conn.commit()
+  conn.close()
+
 # 사용되지 않는 함수
 def add_person():
   info = read_infofile()

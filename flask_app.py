@@ -18,8 +18,15 @@ def index():
     today = datetime.now().strftime('%Y-%m-%d')
     return render_template('index.html', today=today)
 
-@app.route('/get_priorities', methods=['GET'])
+@app.route('/get_priorities', methods=['GET', 'POST'])
 def get_priorities():
+    data = request.get_json()
+    date = data.get('date')
+    time = data.get('time')
+    weekday = data.get('weekday')
+
+    # refresh
+    functions.refresh(date, weekday, time)
     return jsonify(priority_list)
 
 @app.route('/get_activations', methods=['GET'])
