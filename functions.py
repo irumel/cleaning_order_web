@@ -31,6 +31,8 @@ def read_infofile():
     info.append(person_info)
   conn.close()
 
+  info = sorted(info, key=lambda x: x[1])
+  start_index = 0
   for index, person_info in enumerate(info):
     if person_info[0] == ideal_implementer:
       start_index = index
@@ -69,7 +71,8 @@ def write_historyfile(implementer, date, weekday, time):
 # 출력: lst (1차원 리스트 [str, str, str])
 def get_priority_list():
   info = read_infofile()
-  sorted_info = sorted(info, key=lambda x: (-x[4], x[2], x[1], x[5]))
+  info = sorted(info, key=lambda x: x[5])
+  sorted_info = sorted(info, key=lambda x: (-x[4], x[2]))
 
   lst = []
   for data in sorted_info:
@@ -143,6 +146,7 @@ def update_ideal(implementer):
 
   cur.execute("SELECT * FROM info")
   info = cur.fetchall()
+  info = sorted(info, key=lambda x: x[1])
   num = len(implementer)
   for i in range(len(info)):
     if not num: break
